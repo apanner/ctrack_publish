@@ -1,0 +1,67 @@
+// @see - https://www.electron.build/configuration/configuration
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.ctrack.publisher",
+  "productName": "CTrack Publisher",
+  "copyright": "Copyright © CTrack",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}",
+    "buildResources": "build"
+  },
+  "files": [
+    "dist",
+    "dist-electron"
+  ],
+  "extraResources": [
+    {
+      "from": "python",
+      "to": "python",
+      "filter": ["**/*", "!**/__pycache__/**", "!**/*.pyc"]
+    },
+    {
+      "from": "resources",
+      "to": "resources"
+    }
+  ],
+  "protocols": [
+    {
+      "name": "CTrack Publisher",
+      "schemes": ["ctrack-publisher"]
+    }
+  ],
+  "publish": [
+    {
+      "provider": "github",
+      "owner": "apanner",
+      "repo": "ctrack_publish"
+    }
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "artifactName": "CTrack-Publisher-Setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": false,
+    "deleteAppDataOnUninstall": false,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "CTrack Publisher",
+    "runAfterFinish": true
+  },
+  "mac": {
+    "target": ["dmg"],
+    "artifactName": "CTrack-Publisher-Mac-${version}.${ext}"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "artifactName": "CTrack-Publisher-Linux-${version}.${ext}"
+  }
+}

@@ -1,0 +1,100 @@
+[15:42:50.362] [INFO] [PYTHON] configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-
+[15:42:50.399] [INFO] [PYTHON] libavutil      60.  8.100 / 60.  8.100
+[15:42:50.438] [INFO] [PYTHON] libavcodec     62. 11.100 / 62. 11.100
+[15:42:50.480] [INFO] [PYTHON] libavformat    62.  3.100 / 62.  3.100
+[15:42:50.537] [INFO] [PYTHON] libavdevice    62.  1.100 / 62.  1.100
+[15:42:50.585] [INFO] [PYTHON] libavfilter    11.  4.100 / 11.  4.100
+[15:42:50.618] [INFO] [PYTHON] libswscale      9.  1.100 /  9.  1.100
+[15:42:50.658] [INFO] [PYTHON] libswresample   6.  1.100 /  6.  1.100
+[15:42:50.689] [INFO] [PYTHON] Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4':
+[15:42:50.719] [INFO] [PYTHON] Metadata:
+[15:42:50.751] [INFO] [PYTHON] major_brand     : isom
+[15:42:50.791] [INFO] [PYTHON] minor_version   : 512
+[15:42:50.822] [INFO] [PYTHON] compatible_brands: isomiso2mp41
+[15:42:50.860] [INFO] [PYTHON] encoder         : Lavf62.3.100
+[15:42:50.906] [INFO] [PYTHON] Duration: 00:00:04.33, start: 0.000000, bitrate: 2143 kb/s
+[15:42:50.937] [INFO] [PYTHON] Stream #0:0[0x1](und): Video: hevc (Main) (hvc1 / 0x31637668), yuv420p(tv, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 2135 kb/s, 24 fps, 24 tbr, 12288 tbn (default)
+[15:42:50.977] [INFO] [PYTHON] Metadata:
+[15:42:51.020] [INFO] [PYTHON] handler_name    : VideoHandler
+[15:42:51.106] [INFO] [PYTHON] vendor_id       : [0][0][0][0]
+[15:42:51.146] [INFO] [PYTHON] encoder         : Lavc62.11.100 libx265
+[15:42:51.182] [INFO] [PYTHON] Please use -q:a or -q:v, -qscale is ambiguous
+[15:42:51.223] [INFO] [PYTHON] Stream mapping:
+[15:42:51.279] [INFO] [PYTHON] Stream #0:0 -> #0:0 (hevc (native) -> webp (libwebp))
+[15:42:51.320] [INFO] [PYTHON] Press [q] to stop, [?] for help
+[15:42:51.373] [INFO] [PYTHON] Output #0, webp, to 'C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q_thumbs\preview.webp':
+[15:42:51.435] [INFO] [PYTHON] Metadata:
+[15:42:51.487] [INFO] [PYTHON] major_brand     : isom
+[15:42:51.525] [INFO] [PYTHON] minor_version   : 512
+[15:42:51.564] [INFO] [PYTHON] compatible_brands: isomiso2mp41
+[15:42:51.636] [INFO] [PYTHON] encoder         : Lavf62.3.100
+[15:42:51.676] [INFO] [PYTHON] Stream #0:0(und): Video: webp, yuv420p(tv, progressive), 480x270 [SAR 1:1 DAR 16:9], q=2-31, 200 kb/s, 6 fps, 1k tbn (default)
+[15:42:51.706] [INFO] [PYTHON] Metadata:
+[15:42:51.737] [INFO] [PYTHON] encoder         : Lavc62.11.100 libwebp
+[15:42:51.769] [INFO] [PYTHON] handler_name    : VideoHandler
+[15:42:51.809] [INFO] [PYTHON] vendor_id       : [0][0][0][0]
+[15:42:51.880] [INFO] [PYTHON] [out#0/webp @ 0000022165317440] video:177KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.143058%
+[15:42:51.902] [INFO] [PYTHON] frame=   18 fps=0.0 q=-0.0 Lsize=     178KiB time=00:00:03.00 bitrate= 485.3kbits/s speed=7.34x elapsed=0:00:00.40
+[15:42:51.935] [INFO] [PYTHON] Step 3/3: Generate WebP from MP4...
+[15:42:51.965] [INFO] [PYTHON] WebP Preview Command: -y -i C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4 -threads 12 -vf fps=6,scale=480:-1:flags=lanczos -vcodec libwebp -lossless 0 -qscale 75 -loop 0 -an C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.webp
+[15:42:51.996] [INFO] [PYTHON] ffmpeg version 8.0.1-essentials_build-www.gyan.dev Copyright (c) 2000-2025 the FFmpeg developers
+[15:42:52.027] [INFO] [PYTHON] built with gcc 15.2.0 (Rev8, Built by MSYS2 project)
+[15:42:52.065] [INFO] [PYTHON] configuration: --enable-gpl --enable-version3 --enable-static --disable-w32threads --disable-autodetect --enable-fontconfig --enable-iconv --enable-gnutls --enable-libxml2 --enable-gmp --enable-bzlib --enable-lzma --enable-zlib --enable-libsrt --enable-libssh --enable-libzmq --enable-avisynth --enable-sdl2 --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxvid --enable-libaom --enable-libopenjpeg --enable-libvpx --enable-mediafoundation --enable-libass --enable-libfreetype --enable-
+[15:42:52.095] [INFO] [PYTHON] libavutil      60.  8.100 / 60.  8.100
+[15:42:52.125] [INFO] [PYTHON] libavcodec     62. 11.100 / 62. 11.100
+[15:42:52.179] [INFO] [PYTHON] libavformat    62.  3.100 / 62.  3.100
+[15:42:52.210] [INFO] [PYTHON] libavdevice    62.  1.100 / 62.  1.100
+[15:42:52.240] [INFO] [PYTHON] libavfilter    11.  4.100 / 11.  4.100
+[15:42:52.272] [INFO] [PYTHON] libswscale      9.  1.100 /  9.  1.100
+[15:42:52.310] [INFO] [PYTHON] libswresample   6.  1.100 /  6.  1.100
+[15:42:52.340] [INFO] [PYTHON] Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4':
+[15:42:52.438] [INFO] [PYTHON] Metadata:
+[15:42:52.482] [INFO] [PYTHON] major_brand     : isom
+[15:42:52.511] [INFO] [PYTHON] minor_version   : 512
+[15:42:52.548] [INFO] [PYTHON] compatible_brands: isomiso2mp41
+[15:42:52.606] [INFO] [PYTHON] encoder         : Lavf62.3.100
+[15:42:52.644] [INFO] [PYTHON] Duration: 00:00:04.33, start: 0.000000, bitrate: 2143 kb/s
+[15:42:52.685] [INFO] [PYTHON] Stream #0:0[0x1](und): Video: hevc (Main) (hvc1 / 0x31637668), yuv420p(tv, progressive), 1920x1080 [SAR 1:1 DAR 16:9], 2135 kb/s, 24 fps, 24 tbr, 12288 tbn (default)
+[15:42:52.716] [INFO] [PYTHON] Metadata:
+[15:42:52.748] [INFO] [PYTHON] handler_name    : VideoHandler
+[15:42:52.778] [INFO] [PYTHON] vendor_id       : [0][0][0][0]
+[15:42:52.871] [INFO] [PYTHON] encoder         : Lavc62.11.100 libx265
+[15:42:52.904] [INFO] [PYTHON] Please use -q:a or -q:v, -qscale is ambiguous
+[15:42:52.938] [INFO] [PYTHON] Stream mapping:
+[15:42:52.968] [INFO] [PYTHON] Stream #0:0 -> #0:0 (hevc (native) -> webp (libwebp))
+[15:42:53.007] [INFO] [PYTHON] Press [q] to stop, [?] for help
+[15:42:53.050] [INFO] [PYTHON] Output #0, webp, to 'C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.webp':
+[15:42:53.080] [INFO] [PYTHON] Metadata:
+[15:42:53.119] [INFO] [PYTHON] major_brand     : isom
+[15:42:53.152] [INFO] [PYTHON] minor_version   : 512
+[15:42:53.184] [INFO] [PYTHON] compatible_brands: isomiso2mp41
+[15:42:53.213] [INFO] [PYTHON] encoder         : Lavf62.3.100
+[15:42:53.293] [INFO] [PYTHON] Stream #0:0(und): Video: webp, yuv420p(tv, progressive), 480x270 [SAR 1:1 DAR 16:9], q=2-31, 200 kb/s, 6 fps, 1k tbn (default)
+[15:42:53.315] [INFO] [PYTHON] Metadata:
+[15:42:53.342] [INFO] [PYTHON] encoder         : Lavc62.11.100 libwebp
+[15:42:53.372] [INFO] [PYTHON] handler_name    : VideoHandler
+[15:42:53.441] [INFO] [PYTHON] vendor_id       : [0][0][0][0]
+[15:42:53.474] [INFO] [PYTHON] [out#0/webp @ 0000023a9a593bc0] video:238KiB audio:0KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: 0.145933%
+[15:42:53.504] [INFO] [PYTHON] frame=   26 fps=0.0 q=-0.0 Lsize=     239KiB time=00:00:04.33 bitrate= 451.0kbits/s speed=8.45x elapsed=0:00:00.51
+[15:42:53.534] [INFO] [GENERATE] MP4 Done: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4
+[15:42:53.534] [INFO] [GENERATE] WebP Done: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.webp
+[15:42:53.969] [INFO] [UPLOAD] Starting MP4 + thumb + WebP in parallel: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4
+[15:42:58.308] [INFO] [UPLOAD] MP4 Success.
+[15:42:58.308] [INFO] [UPLOAD] Thumbnail JPG Success.
+[15:42:58.308] [INFO] [UPLOAD] WebP Success.
+[15:42:58.308] [INFO] [DATABASE] Inserting version v001 for shot 722ce4d0-7208-4d20-88cd-d9435a55c7e5
+[15:42:58.749] [INFO] [DATABASE] Success.
+[15:42:58.750] [INFO] ─────────────────────────────────────────
+[15:42:58.750] [INFO] 📋 PUBLISH REPORT: STU101_006_0050_comp_v001.mp4 (v001)
+[15:42:58.750] [INFO] ─────────────────────────────────────────
+[15:42:58.750] [INFO]   ✓ STU101_006_0050_Compositing.mp4: 1.1 MB → Projects/c90b4ef4-a1e0-4b3a-ade8-8ddf70a30d45/Shots/722ce4d0-7208-4d20-88cd-d9435a55c7e5/Publishes/v001/STU101_006_0050_Compositing.mp4
+[15:42:58.751] [INFO]   ✓ STU101_006_0050_Compositing_thumb.jpg: 39.4 KB → Projects/c90b4ef4-a1e0-4b3a-ade8-8ddf70a30d45/Shots/722ce4d0-7208-4d20-88cd-d9435a55c7e5/Publishes/v001/thumbnails/STU101_006_0050_Compositing_thumb.jpg
+[15:42:58.751] [INFO]   ✓ STU101_006_0050_Compositing_preview.webp: 238.6 KB → Projects/c90b4ef4-a1e0-4b3a-ade8-8ddf70a30d45/Shots/722ce4d0-7208-4d20-88cd-d9435a55c7e5/Publishes/v001/thumbnails/STU101_006_0050_Compositing_preview.webp
+[15:42:58.751] [INFO] ─────────────────────────────────────────
+[15:42:58.751] [INFO]   Total: 1.4 MB | OK: 3 | Failed: 0
+[15:42:58.751] [INFO] ─────────────────────────────────────────
+[15:42:58.751] [INFO] [DONE] STU101_006_0050_comp_v001.mp4 published successfully!
+[15:42:58.751] [INFO] [CLEANUP] Removing temp file: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.mp4
+[15:42:58.848] [INFO] [CLEANUP] Removing temp file: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q.webp
+[15:42:58.882] [INFO] [CLEANUP] Removing temp file: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q_thumbs\thumbnail.jpg
+[15:42:58.926] [INFO] [CLEANUP] Removing temp file: C:\Users\aMegaPC\AppData\Local\Temp\STU101_006_0050_Compositing_yha45q_thumbs\preview.webp

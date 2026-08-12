@@ -1,0 +1,18 @@
+diff --git a/node_modules/vite-plugin-electron/dist/index.js b/node_modules/vite-plugin-electron/dist/index.js
+index bc5d554..fa48f8a 100644
+--- a/node_modules/vite-plugin-electron/dist/index.js
++++ b/node_modules/vite-plugin-electron/dist/index.js
+@@ -125,7 +125,12 @@ function resolvePackageJson(root = process.cwd()) {
+ }
+ function treeKillSync(pid) {
+   if (process.platform === "win32") {
+-    cp.execSync(`taskkill /pid ${pid} /T /F`);
++    try {
++      cp.execSync(`taskkill /pid ${pid} /T /F`, { stdio: "pipe" });
++    } catch (e) {
++      if (e.status !== 128 && e.status !== 1 && !/not found/i.test(String(e.message)))
++        throw e;
++    }
+   } else {
+     killTree(pidTree({ pid, ppid: process.pid }));
+   }

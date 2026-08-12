@@ -1,0 +1,22 @@
+- [ ] **Phase 4: Structure & Auth (The Shell V2)**
+    - [ ] **Authentication**:
+        - [ ] Implement Google OAuth (Supabase) in the UI.
+        - [ ] Add session persistence and user profile display.
+    - [ ] **GUI Layout**:
+        - [ ] Create Sidebar/Tab system: [Quick Publish], [Bulk Ingest], [Queue].
+        - [ ] Refactor `StagingZone` and `ContextBar` into the "Quick Publish" tab.
+    - [ ] **Persistence**:
+        - [ ] Setup simple local store for Queue (Survives app restart).
+
+- [ ] **Phase 5: High-Speed Engine (Python Advanced)**
+    - [ ] **Scanner**:
+        - [ ] Implement recursive folder scanning in Python.
+        - [ ] Add pattern matching for Shot/Version detection.
+    - [ ] **Transcoder**:
+        - [ ] Add Burn-in text to MP4 proxies.
+        - [ ] Add Animated GIF generation (10 frames).
+
+- [ ] **Phase 6: Deployment & Polish**
+    - [ ] Complete **Bulk Ingest** workflow (Grid view of detected sequences).
+    - [ ] System Notifications (App + OS).
+    - [ ] Configure `electron-builder` for multi-platform distribution.
