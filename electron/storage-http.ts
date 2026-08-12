@@ -11,14 +11,22 @@ const require = createRequire(import.meta.url)
 const moduleDir = path.dirname(fileURLToPath(import.meta.url))
 
 export function loadPublisherEnv(): void {
-  const candidates = [
+  const candidates: string[] = [
+    // Packaged install: CI-written config next to resources (not a dumped .env in the repo)
+    typeof process.resourcesPath === "string" && process.resourcesPath
+      ? path.join(process.resourcesPath, "publisher-config.env")
+      : "",
+    path.join(moduleDir, "..", "resources", "publisher-config.env"),
+    // Dev / optional user overrides
     path.join(process.cwd(), ".env"),
     path.join(moduleDir, "..", ".env"),
     path.join(moduleDir, "..", "..", ".env"),
-  ]
+  ].filter(Boolean)
+
   for (const envPath of candidates) {
     if (fs.existsSync(envPath)) {
-      dotenv.config({ path: envPath })
+      dotenv.config({ path: envPath, override: false })
+      console.log("[ctrack] loaded env:", envPath)
     }
   }
 }

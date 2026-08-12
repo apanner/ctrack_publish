@@ -12,9 +12,6 @@ permissions:
 jobs:
   windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: .
     steps:
       - uses: actions/checkout@v4
 
@@ -29,10 +26,51 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx electron-builder install-app-deps
 
+      # Google auth (renderer): Vite bakes these into the UI bundle — anon key is public by design.
+      # Storage (main): publisher-config.env is copied into the install resources — not committed.
+      - name: Write packaged publisher-config.env
+        shell: pwsh
+        env:
+          STORAGE_PROVIDER: ${{ secrets.STORAGE_PROVIDER }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+          HYBRID_STORAGE_PRIMARY_ENDPOINT: ${{ secrets.HYBRID_STORAGE_PRIMARY_ENDPOINT }}
+          HYBRID_STORAGE_PRIMARY_ACCESS_KEY: ${{ secrets.HYBRID_STORAGE_PRIMARY_ACCESS_KEY }}
+          HYBRID_STORAGE_PRIMARY_SECRET_KEY: ${{ secrets.HYBRID_STORAGE_PRIMARY_SECRET_KEY }}
+          HYBRID_STORAGE_PRIMARY_BUCKET: ${{ secrets.HYBRID_STORAGE_PRIMARY_BUCKET }}
+          HYBRID_STORAGE_PRIMARY_REGION: ${{ secrets.HYBRID_STORAGE_PRIMARY_REGION }}
+        run: |
+          New-Item -ItemType Directory -Force -Path resources | Out-Null
+          @(
+            "STORAGE_PROVIDER=$env:STORAGE_PROVIDER"
+            "AWS_ACCESS_KEY_ID=$env:AWS_ACCESS_KEY_ID"
+            "AWS_SECRET_ACCESS_KEY=$env:AWS_SECRET_ACCESS_KEY"
+            "AWS_REGION=$env:AWS_REGION"
+            "AWS_S3_BUCKET_NAME=$env:AWS_S3_BUCKET_NAME"
+            "HYBRID_STORAGE_PRIMARY_ENDPOINT=$env:HYBRID_STORAGE_PRIMARY_ENDPOINT"
+            "HYBRID_STORAGE_PRIMARY_ACCESS_KEY=$env:HYBRID_STORAGE_PRIMARY_ACCESS_KEY"
+            "HYBRID_STORAGE_PRIMARY_SECRET_KEY=$env:HYBRID_STORAGE_PRIMARY_SECRET_KEY"
+            "HYBRID_STORAGE_PRIMARY_BUCKET=$env:HYBRID_STORAGE_PRIMARY_BUCKET"
+            "HYBRID_STORAGE_PRIMARY_REGION=$env:HYBRID_STORAGE_PRIMARY_REGION"
+          ) | Set-Content -Path resources/publisher-config.env -Encoding utf8
+          if (-not $env:VITE_SUPABASE_URL) { Write-Host "Note: VITE secrets applied in Build step" }
+
       - name: Build and publish
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npm run build:publish
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_AUTH_CALLBACK_URL: ${{ secrets.VITE_AUTH_CALLBACK_URL }}
+        run: |
+          if (-not $env:VITE_SUPABASE_URL -or -not $env:VITE_SUPABASE_ANON_KEY) {
+            throw "Missing GitHub secrets VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY (required for Google login in installer)"
+          }
+          if (-not $env:VITE_AUTH_CALLBACK_URL) {
+            $env:VITE_AUTH_CALLBACK_URL = "http://127.0.0.1:3847/auth/callback"
+          }
+          npm run build:publish
 
       - name: Upload Setup.exe
         uses: actions/upload-artifact@v4

@@ -28,3 +28,4 @@ dist-ssr
 *.sw?
 
 release/
+resources/publisher-config.env

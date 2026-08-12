@@ -34,7 +34,7 @@ function App() {
   )
 
   useEffect(() => {
-    const w = window as Window & {
+    const w = window as unknown as {
       ipcRenderer?: {
         invoke: (ch: string) => Promise<string | null>
         on: (ch: string, fn: (_: unknown, code: string) => void) => (() => void) | void

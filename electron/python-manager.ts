@@ -115,7 +115,7 @@ export class PythonManager extends EventEmitter {
 
     stop() {
         if (this.shell) {
-            this.shell.end((err, code, signal) => {
+            this.shell.end((err, code, _signal) => {
                 if (err) console.error('Python stop error:', err);
                 console.log('Python Sidecar stopped with code', code);
             });

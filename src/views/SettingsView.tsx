@@ -80,6 +80,11 @@ export function SettingsView() {
     }
   }, [addLog])
 
+  const handleReset = useCallback(() => {
+    setSettings(DEFAULT_SETTINGS)
+    addLog("info", "Settings reset to defaults.")
+  }, [addLog])
+
   if (!loaded) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500">

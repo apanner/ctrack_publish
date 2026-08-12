@@ -1,7 +1,7 @@
 {
   "name": "ctrack-publisher",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CTrack Publisher — desktop publish app for CTrack studios",
   "author": "CTrack",
   "scripts": {
@@ -23,6 +23,7 @@
     "@supabase/supabase-js": "^2.93.3",
     "@tanstack/react-query": "^5.90.20",
     "better-sqlite3": "^12.6.2",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "electron-updater": "^6.3.9",
