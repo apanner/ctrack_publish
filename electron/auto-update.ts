@@ -40,13 +40,12 @@ export function startAutoUpdater(getMainWindow: () => BrowserWindow | null): voi
     })
   })
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('[auto-update] Downloaded', info.version, '— installing on quit / now')
+    console.log('[auto-update] Downloaded', info.version, '— installing and restarting')
     const win = getMainWindow()
     win?.webContents.send('updater:status', { status: 'ready', version: info.version })
-    // Install promptly so artists pick up features without a separate download visit
     setTimeout(() => {
       autoUpdater.quitAndInstall(false, true)
-    }, 2500)
+    }, 1800)
   })
   autoUpdater.on('error', (err) => {
     console.warn('[auto-update] Error:', err?.message || err)

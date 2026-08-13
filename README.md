@@ -2,6 +2,14 @@
 
 Desktop publish app for CTrack studios. Google login, queue, transcode, S3/MinIO upload — same Supabase project as **ctrack_v0**.
 
+## Install location
+
+NSIS one-click install (per-user):
+
+- App: `%LOCALAPPDATA%\Programs\CTrack Publisher\`
+- Desktop + Start Menu shortcuts (CTrack icon)
+- Protocol: `ctrack-publisher://open`
+
 ## Artist flow
 
 1. In **ctrack_v0**, click **Publisher** (top-right).

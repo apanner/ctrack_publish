@@ -26,6 +26,10 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx electron-builder install-app-deps
 
+      - name: Bundle FFmpeg runtime
+        shell: pwsh
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ensure-media-runtime.ps1
+
       # Google auth (renderer): Vite bakes these into the UI bundle — anon key is public by design.
       # Storage (main): publisher-config.env is copied into the install resources — not committed.
       - name: Write packaged publisher-config.env

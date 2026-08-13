@@ -380,12 +380,15 @@ export function SettingsView() {
               />
             </div>
             <div className="space-y-2">
-              <label className={labelClass}>FFmpeg path (empty = system)</label>
+              <label className={labelClass}>FFmpeg (bundled)</label>
+              <p className="text-xs text-gray-500">
+                Publish uses the FFmpeg shipped with this installer. Override only if you need a custom binary.
+              </p>
               <Input
                 value={settings.general.ffmpegPath}
                 onChange={(e) => updateGeneral({ ffmpegPath: e.target.value })}
                 className={inputClass}
-                placeholder="Leave empty to use system ffmpeg"
+                placeholder="Leave empty to use bundled FFmpeg"
               />
             </div>
             <div className="flex items-center gap-3 pt-1">
@@ -398,7 +401,9 @@ export function SettingsView() {
               >
                 Check for updates
               </Button>
-              <span className="text-xs text-gray-500">Installed builds update from GitHub Releases automatically.</span>
+              <span className="text-xs text-gray-500">
+                New GitHub Releases download automatically, then the app restarts into the new version.
+              </span>
             </div>
           </div>
         </section>

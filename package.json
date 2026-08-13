@@ -1,7 +1,7 @@
 {
   "name": "ctrack-publisher",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "CTrack Publisher — desktop publish app for CTrack studios",
   "author": "CTrack",
   "scripts": {

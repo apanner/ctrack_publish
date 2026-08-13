@@ -106,13 +106,26 @@ function startAuthCallbackServer() {
   <div style="text-align:center;padding:2rem;">
     <h1 style="color:#24E1B1;">CTrack Publisher</h1>
     ${error
-        ? `<p style="color:#f87171;">Login failed. You can close this tab.</p>`
-        : `<p style="margin:1rem 0;">Login successful.</p><p style="color:#94a3b8;font-size:14px;">You can close this tab. Closing automatically in 3 seconds...</p><script>setTimeout(function(){ window.close(); }, 3000);</script>`}
+        ? `<p style="color:#f87171;">Login failed. You can close this tab.</p>
+           <script>setTimeout(function(){ window.close(); }, 2500);</script>`
+        : `<p style="margin:1rem 0;">Login successful.</p>
+           <p style="color:#94a3b8;font-size:14px;">Returning to CTrack Publisher…</p>
+           <script>
+             setTimeout(function(){ window.close(); }, 400);
+             setTimeout(function(){ window.location.replace('about:blank'); }, 800);
+           </script>`}
   </div>
 </body>
 </html>`
     res.writeHead(200, { 'Content-Type': 'text/html' })
     res.end(html)
+  })
+  authCallbackServer.on('error', (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log('[auth-callback-server] Port 3847 already in use — Publisher already running. Focusing existing window.')
+      return
+    }
+    console.warn('[auth-callback-server]', err.message)
   })
   authCallbackServer.listen(AUTH_CALLBACK_PORT, '127.0.0.1', () => {
     console.log('[auth-callback-server] Server listening on 127.0.0.1:' + AUTH_CALLBACK_PORT)
@@ -120,11 +133,17 @@ function startAuthCallbackServer() {
 }
 
 function createWindow() {
+  const iconCandidates = [
+    path.join(process.env.VITE_PUBLIC || '', 'ctrack-icon.ico'),
+    path.join(process.env.VITE_PUBLIC || '', 'ctrack-icon.png'),
+    path.join(app.getAppPath(), 'build', 'icon.ico'),
+  ]
+  const iconPath = iconCandidates.find((p) => p && fs.existsSync(p))
   win = new BrowserWindow({
     title: 'CTrack Publisher',
     width: 1375,
     height: 1000,
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: iconPath,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },

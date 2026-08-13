@@ -5,10 +5,22 @@ import fs from 'fs';
 import { EventEmitter } from 'events';
 import { app } from 'electron';
 
-/** Resolve Python executable for current platform (avoids WinError 2 on Windows when `python` not in PATH). */
+function resolveResourcesRoot(): string {
+    if (app.isPackaged) return process.resourcesPath
+    return path.join(__dirname, '..')
+}
+
+/** Prefer bundled portable Python, then system. */
 function resolvePythonPath(): string {
+    const root = resolveResourcesRoot()
+    const bundled = [
+        path.join(root, 'runtime', 'python', 'python.exe'),
+        path.join(root, 'resources', 'runtime', 'python', 'python.exe'),
+    ]
+    for (const candidate of bundled) {
+        if (fs.existsSync(candidate)) return candidate
+    }
     if (process.platform === 'win32') {
-        // Windows: try py launcher first (official installer), then python
         const candidates = ['py', 'python'];
         for (const name of candidates) {
             try {
@@ -53,12 +65,19 @@ export class PythonManager extends EventEmitter {
         if (process.platform === 'win32' && this.pythonPath === 'py') {
             pythonOptions.unshift('-3');
         }
+        const resourcesRoot = resolveResourcesRoot()
+        process.env.CTRACK_RESOURCES_PATH = resourcesRoot
+        const ffmpegDir = path.join(resourcesRoot, 'runtime', 'ffmpeg')
+        if (fs.existsSync(path.join(ffmpegDir, 'ffmpeg.exe'))) {
+            process.env.PATH = `${ffmpegDir}${path.delimiter}${process.env.PATH || ''}`
+        }
         const options: Options = {
             mode: 'json',
             pythonPath: this.pythonPath,
             pythonOptions,
             scriptPath: scriptDir,
             args: scriptArgs,
+            env: { ...process.env, CTRACK_RESOURCES_PATH: resourcesRoot },
         };
 
         this.shell = new PythonShell(path.basename(this.scriptPath), options);

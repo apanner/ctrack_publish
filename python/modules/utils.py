@@ -5,54 +5,28 @@ import shutil
 
 def get_ffmpeg_path():
     """
-    Finds the ffmpeg executable.
-    1. Checks for embedded FFmpeg in resources/bin.
-    2. Checks if 'ffmpeg' is in the system PATH.
-    3. Checks if 'static-ffmpeg' is installed.
-    4. Checks common installation paths on Windows.
+    Prefer bundled FFmpeg (installer runtime / resources/bin). Never require a system install.
     """
-    # 1. Check for embedded version (Preferred)
-    try:
-        # From d:\dev\track\ctrack_publish\python\modules\utils.py 
-        # to d:\dev\track\ctrack_publish\resources\bin\ffmpeg.exe
-        modules_dir = os.path.dirname(os.path.abspath(__file__))
-        python_dir = os.path.dirname(modules_dir)
-        project_root = os.path.dirname(python_dir)
-        
-        local_ffmpeg = os.path.join(project_root, "resources", "bin", "ffmpeg.exe")
-        if os.path.exists(local_ffmpeg):
-            return local_ffmpeg
-    except Exception:
-        pass
+    modules_dir = os.path.dirname(os.path.abspath(__file__))
+    python_dir = os.path.dirname(modules_dir)
+    project_root = os.path.dirname(python_dir)
+    resources_path = os.environ.get("CTRACK_RESOURCES_PATH") or ""
 
-    # 2. Check if it's already in PATH
-    ffmpeg_in_path = shutil.which('ffmpeg')
-    if ffmpeg_in_path:
-        return 'ffmpeg'
+    candidates = [
+        os.path.join(resources_path, "runtime", "ffmpeg", "ffmpeg.exe") if resources_path else "",
+        os.path.join(resources_path, "bin", "ffmpeg.exe") if resources_path else "",
+        os.path.join(project_root, "resources", "runtime", "ffmpeg", "ffmpeg.exe"),
+        os.path.join(project_root, "resources", "bin", "ffmpeg.exe"),
+        os.path.join(python_dir, "..", "resources", "runtime", "ffmpeg", "ffmpeg.exe"),
+    ]
+    for candidate in candidates:
+        if candidate and os.path.isfile(os.path.normpath(candidate)):
+            return os.path.normpath(candidate)
 
-    # 2. Check for static-ffmpeg (Python package that provides binaries)
-    try:
-        from static_ffmpeg import run
-        # This returns the path to the ffmpeg executable provided by the package
-        path, _ = run.get_or_fetch_platform_executables_else_raise()
-        if path and os.path.exists(path):
-            return path
-    except (ImportError, Exception):
-        pass
-
-    # 3. Common Windows paths
-    if os.name == 'nt':
-        common_paths = [
-            "C:/ffmpeg/bin/ffmpeg.exe",
-            "C:/Program Files/ffmpeg/bin/ffmpeg.exe",
-            "C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe"
-        ]
-        for p in common_paths:
-            if os.path.exists(p):
-                return p
-
-    # Fallback to 'ffmpeg' and let it fail if not found
-    return 'ffmpeg'
+    bundled = shutil.which("ffmpeg")
+    if bundled:
+        return bundled
+    return "ffmpeg"
 
 def get_threads_for_parallel():
     """Returns thread count for FFmpeg when running 2 processes in parallel (~50% CPU each)."""

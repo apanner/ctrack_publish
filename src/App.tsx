@@ -36,19 +36,37 @@ function App() {
   useEffect(() => {
     const w = window as unknown as {
       ipcRenderer?: {
-        invoke: (ch: string) => Promise<string | null>
-        on: (ch: string, fn: (_: unknown, code: string) => void) => (() => void) | void
+        invoke: (ch: string, ...args: unknown[]) => Promise<unknown>
+        on: (ch: string, fn: (_: unknown, ...args: unknown[]) => void) => (() => void) | void
       }
     }
     if (!w.ipcRenderer) return
-    const onCode = (_: unknown, code: string) => void handleAuthCode(code)
+    const onCode = (_: unknown, ...args: unknown[]) => void handleAuthCode(String(args[0] ?? ""))
     const unsubscribe = w.ipcRenderer.on("auth-callback-code", onCode)
     const interval = setInterval(() => {
       if (codeHandledRef.current) return
-      w.ipcRenderer!.invoke("auth:get-pending-code").then(handleAuthCode)
+      w.ipcRenderer!.invoke("auth:get-pending-code").then((code) => handleAuthCode(code as string | null))
     }, 400)
+
+    const onUpdate = (_: unknown, ...args: unknown[]) => {
+      const payload = (args[0] || {}) as { status?: string; version?: string; percent?: number; message?: string }
+      if (payload?.status === "available") {
+        toast.info(`Update ${payload.version} found — downloading…`)
+      } else if (payload?.status === "downloading" && typeof payload.percent === "number") {
+        toast.message(`Downloading update… ${Math.round(payload.percent)}%`)
+      } else if (payload?.status === "ready") {
+        toast.success(`Update ${payload.version} ready — restarting Publisher…`)
+      } else if (payload?.status === "current") {
+        toast.message(`Publisher ${payload.version} is up to date`)
+      } else if (payload?.status === "error" && payload.message) {
+        toast.error(`Update: ${payload.message}`)
+      }
+    }
+    const unsubUpdate = w.ipcRenderer.on("updater:status", onUpdate)
+
     return () => {
       if (typeof unsubscribe === "function") unsubscribe()
+      if (typeof unsubUpdate === "function") unsubUpdate()
       clearInterval(interval)
     }
   }, [handleAuthCode])
