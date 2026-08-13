@@ -34,7 +34,8 @@
     {
       "provider": "github",
       "owner": "apanner",
-      "repo": "ctrack_publish"
+      "repo": "ctrack_publish",
+      "releaseType": "release"
     }
   ],
   "win": {
