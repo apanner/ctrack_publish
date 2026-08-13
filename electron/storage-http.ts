@@ -16,6 +16,9 @@ export function loadPublisherEnv(): void {
     typeof process.resourcesPath === "string" && process.resourcesPath
       ? path.join(process.resourcesPath, "publisher-config.env")
       : "",
+    typeof process.resourcesPath === "string" && process.resourcesPath
+      ? path.join(process.resourcesPath, "resources", "publisher-config.env")
+      : "",
     path.join(moduleDir, "..", "resources", "publisher-config.env"),
     // Dev / optional user overrides
     path.join(process.cwd(), ".env"),

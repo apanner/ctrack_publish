@@ -17,41 +17,34 @@ def log_to_electron(msg):
         sys.stdout.flush()
 
 def check_dependencies():
-    missing = []
+    missing_pip = []
+    missing_runtime = []
     try:
         import cv2
     except ImportError:
-        missing.append('opencv-python')
+        missing_pip.append('opencv-python')
     
     try:
         import ffmpeg
     except ImportError:
-        missing.append('ffmpeg-python')
+        missing_pip.append('ffmpeg-python')
 
-    # Check for FFmpeg Binary
     from modules.utils import get_ffmpeg_path, get_oiiotool_path, get_ocio_config_path
     ffmpeg_path = get_ffmpeg_path()
     oiiotool = get_oiiotool_path()
     ocio = get_ocio_config_path()
-    if not os.path.isfile(oiiotool) and oiiotool == "oiiotool":
-        missing.append("oiiotool (bundled OpenImageIO)")
+    if not os.path.isfile(oiiotool):
+        missing_runtime.append('OpenImageIO (oiiotool)')
     if not ocio:
-        missing.append("OCIO config (bundled)")
-    
-    # If binary missing, we might need to suggest a way to get it
+        missing_runtime.append('OCIO config')
     if ffmpeg_path == 'ffmpeg':
         import shutil
         if not shutil.which('ffmpeg'):
-            # Binary is missing from PATH
-            # We can suggest 'static-ffmpeg' which includes the binary
-            try:
-                import static_ffmpeg
-            except ImportError:
-                missing.append('static-ffmpeg (for ffmpeg binary)')
+            missing_runtime.append('FFmpeg')
     elif not os.path.exists(ffmpeg_path):
-        missing.append('ffmpeg (binary path invalid)')
+        missing_runtime.append('FFmpeg')
 
-    return missing
+    return missing_pip, missing_runtime
 
 def main():
     while True:
@@ -70,8 +63,12 @@ def main():
                 result = {'status': 'ok', 'message': 'pong'}
             
             elif command == 'check_dependencies':
-                missing = check_dependencies()
-                result = {'status': 'success', 'missing': missing}
+                missing_pip, missing_runtime = check_dependencies()
+                result = {
+                    'status': 'success',
+                    'missing': missing_pip,
+                    'missing_runtime': missing_runtime,
+                }
 
             elif command == 'scan_folder':
                 from modules.scanner import scan_directory

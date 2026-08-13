@@ -354,12 +354,21 @@ export function usePublishQueue() {
     useEffect(() => {
         (window as any).ipcRenderer.invoke('python-command', { command: 'check_dependencies' })
             .then((res: any) => {
-                if (res.status === 'success' && res.missing && res.missing.length > 0) {
-                    const missing = res.missing as string[];
-                    addLog('error', `[DEPENDENCY] Missing Python modules: ${missing.join(', ')}`);
-                    if (confirm(`The following Python modules are missing: ${missing.join(', ')}. Would you like to install them now?`)) {
-                        addLog('info', `[DEPENDENCY] Installing ${missing.join(', ')}...`);
-                        (window as any).ipcRenderer.invoke('python:install-deps', { modules: missing })
+                const missingPip = ((res.missing as string[]) || []).filter((name) =>
+                    /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)
+                )
+                const missingRuntime = (res.missing_runtime as string[]) || []
+                if (missingRuntime.length > 0) {
+                    addLog(
+                        'error',
+                        `[DEPENDENCY] Bundled media runtime missing: ${missingRuntime.join(', ')}. Reinstall CTrack Publisher or run scripts/ensure-media-runtime.ps1 — these are not pip packages.`
+                    )
+                }
+                if (missingPip.length > 0) {
+                    addLog('error', `[DEPENDENCY] Missing Python modules: ${missingPip.join(', ')}`);
+                    if (confirm(`The following Python modules are missing: ${missingPip.join(', ')}. Would you like to install them now?`)) {
+                        addLog('info', `[DEPENDENCY] Installing ${missingPip.join(', ')}...`);
+                        (window as any).ipcRenderer.invoke('python:install-deps', { modules: missingPip })
                             .then((stdout: string) => {
                                 addLog('info', `[DEPENDENCY] Installation complete: ${stdout}`);
                                 alert('Dependencies installed successfully. Please restart processing if needed.');
@@ -369,7 +378,7 @@ export function usePublishQueue() {
                                 alert(`Failed to install dependencies: ${err}`);
                             });
                     }
-                } else if (res.status === 'success') {
+                } else if (res.status === 'success' && missingRuntime.length === 0) {
                     addLog('info', `[DEPENDENCY] All Python dependencies verified.`);
                 }
             })

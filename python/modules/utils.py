@@ -5,13 +5,33 @@ import shutil
 from pathlib import Path
 
 
+def _has_runtime(root: Path) -> bool:
+    runtime = root / "runtime"
+    return (runtime / "ffmpeg").is_dir() or (runtime / "oiio").is_dir() or (runtime / "ocio").is_dir()
+
+
 def _runtime_root() -> Path:
+    candidates = []
     env = os.environ.get("CTRACK_RESOURCES_PATH")
     if env:
-        return Path(env)
+        env_path = Path(env)
+        candidates.extend([env_path, env_path / "resources"])
     modules_dir = Path(__file__).resolve().parent
     python_dir = modules_dir.parent
-    return python_dir.parent / "resources"
+    project_root = python_dir.parent
+    candidates.extend(
+        [
+            project_root / "resources",
+            python_dir.parent / "resources",
+            project_root,
+        ]
+    )
+    for root in candidates:
+        if _has_runtime(root):
+            return root
+    if env:
+        return Path(env)
+    return project_root / "resources"
 
 
 def get_ffmpeg_path():

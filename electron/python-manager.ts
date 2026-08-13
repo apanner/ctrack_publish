@@ -5,9 +5,27 @@ import fs from 'fs';
 import { EventEmitter } from 'events';
 import { app } from 'electron';
 
+function hasMediaRuntime(root: string): boolean {
+    return (
+        fs.existsSync(path.join(root, 'runtime', 'ffmpeg')) ||
+        fs.existsSync(path.join(root, 'runtime', 'oiio')) ||
+        fs.existsSync(path.join(root, 'runtime', 'ocio'))
+    )
+}
+
+/** Folder that contains `runtime/` (FFmpeg, OIIO, OCIO). Packaged extraResources land in resources/. */
 function resolveResourcesRoot(): string {
-    if (app.isPackaged) return process.resourcesPath
-    return path.join(__dirname, '..')
+    const packaged = app.isPackaged ? process.resourcesPath : ''
+    const projectRoot = path.join(__dirname, '..')
+    const candidates = [
+        packaged,
+        packaged ? path.join(packaged, 'resources') : '',
+        path.join(projectRoot, 'resources'),
+        projectRoot,
+    ].filter(Boolean)
+    const hit = candidates.find((root) => hasMediaRuntime(root))
+    if (hit) return hit
+    return packaged ? path.join(packaged, 'resources') : path.join(projectRoot, 'resources')
 }
 
 /** Prefer bundled portable Python, then system. */
@@ -45,7 +63,7 @@ function resolveEngineScript(): string {
 
 export class PythonManager extends EventEmitter {
     private shell: PythonShell | null = null;
-    private pythonPath: string;
+    pythonPath: string;
     private scriptPath: string;
     private commandCounter = 0;
 

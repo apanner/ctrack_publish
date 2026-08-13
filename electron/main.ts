@@ -212,15 +212,19 @@ ipcMain.handle('upload-s3', async (event: any, { filePath, bucketName, key }: { 
 })
 
 ipcMain.handle('python:install-deps', async (_event: any, { modules }: { modules: string[] }) => {
-  const { exec } = require('child_process')
+  const { execFile } = require('child_process')
+  const pipName = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+  const toInstall = (modules || []).filter((name) => pipName.test(String(name || '').trim()))
+  if (toInstall.length === 0) {
+    throw new Error('No installable Python packages (bundled OIIO/OCIO/FFmpeg cannot be pip-installed).')
+  }
+  const pythonExe = pythonManager.pythonPath || (process.platform === 'win32' ? 'python' : 'python3')
   return new Promise((resolve, reject) => {
-    const pythonExe = process.platform === 'win32' ? 'python' : 'python3'
-    const cmd = `${pythonExe} -m pip install ${modules.join(' ')}`
-    console.log('[MAIN] Installing dependencies:', cmd)
-    exec(cmd, (err: any, stdout: string, stderr: string) => {
+    console.log('[MAIN] Installing dependencies:', pythonExe, toInstall)
+    execFile(pythonExe, ['-m', 'pip', 'install', ...toInstall], (err: any, stdout: string, stderr: string) => {
       if (err) {
         console.error('[MAIN] Pip failed:', stderr)
-        reject(stderr)
+        reject(stderr || err.message)
       } else {
         console.log('[MAIN] Pip success:', stdout)
         resolve(stdout)
