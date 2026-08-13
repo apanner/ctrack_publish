@@ -8,7 +8,7 @@ import { S3Manager } from './s3-manager'
 import { QueueManager } from './queue-manager'
 import type { DBJobEventInput } from './queue-manager'
 import { getVideoMetadata } from './video-metadata'
-import { startAutoUpdater, checkForUpdatesNow } from './auto-update'
+import { startAutoUpdater, checkForUpdatesNow, checkForUpdatesOnLaunch, installUpdateNow } from './auto-update'
 
 const _dirname = __dirname
 
@@ -176,6 +176,7 @@ function createWindow() {
 
   win.webContents.on('did-finish-load', () => {
     win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    checkForUpdatesOnLaunch()
     if (pendingProtocolUrl && win && !win.isDestroyed()) {
       const url = pendingProtocolUrl
       pendingProtocolUrl = null
@@ -616,5 +617,6 @@ app.whenReady().then(() => {
 })
 
 ipcMain.handle('updater:check', async () => checkForUpdatesNow())
+ipcMain.handle('updater:install', async () => installUpdateNow())
 ipcMain.handle('app:get-version', async () => app.getVersion())
 

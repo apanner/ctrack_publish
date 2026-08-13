@@ -4,6 +4,7 @@ import { Toaster, toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { AuthGuard } from "@/components/auth/AuthGuard"
 import { AppShell } from "@/components/layout/AppShell"
+import { UpdatePrompt } from "@/components/update-prompt"
 
 const AUTH_QUERY_KEYS = { session: ["auth", "session"] as const, user: ["auth", "user"] as const }
 
@@ -48,25 +49,8 @@ function App() {
       w.ipcRenderer!.invoke("auth:get-pending-code").then((code) => handleAuthCode(code as string | null))
     }, 400)
 
-    const onUpdate = (_: unknown, ...args: unknown[]) => {
-      const payload = (args[0] || {}) as { status?: string; version?: string; percent?: number; message?: string }
-      if (payload?.status === "available") {
-        toast.info(`Update ${payload.version} found — downloading…`)
-      } else if (payload?.status === "downloading" && typeof payload.percent === "number") {
-        toast.message(`Downloading update… ${Math.round(payload.percent)}%`)
-      } else if (payload?.status === "ready") {
-        toast.success(`Update ${payload.version} ready — restarting Publisher…`)
-      } else if (payload?.status === "current") {
-        toast.message(`Publisher ${payload.version} is up to date`)
-      } else if (payload?.status === "error" && payload.message) {
-        toast.error(`Update: ${payload.message}`)
-      }
-    }
-    const unsubUpdate = w.ipcRenderer.on("updater:status", onUpdate)
-
     return () => {
       if (typeof unsubscribe === "function") unsubscribe()
-      if (typeof unsubUpdate === "function") unsubUpdate()
       clearInterval(interval)
     }
   }, [handleAuthCode])
@@ -76,6 +60,7 @@ function App() {
       <AuthGuard>
         <AppShell />
       </AuthGuard>
+      <UpdatePrompt />
       <Toaster position="bottom-right" richColors theme="dark" />
     </>
   )

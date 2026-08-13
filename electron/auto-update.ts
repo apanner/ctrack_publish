@@ -3,9 +3,17 @@
  * Artists install once from the web; later builds update in-app.
  */
 import { autoUpdater } from 'electron-updater'
-import { BrowserWindow, app } from 'electron'
+import { BrowserWindow, Notification, app } from 'electron'
 
 let started = false
+
+function sendStatus(
+  getMainWindow: () => BrowserWindow | null,
+  payload: Record<string, unknown>
+): void {
+  const win = getMainWindow()
+  win?.webContents.send('updater:status', payload)
+}
 
 export function startAutoUpdater(getMainWindow: () => BrowserWindow | null): void {
   if (started) return
@@ -20,37 +28,42 @@ export function startAutoUpdater(getMainWindow: () => BrowserWindow | null): voi
 
   autoUpdater.on('checking-for-update', () => {
     console.log('[auto-update] Checking for update…')
+    sendStatus(getMainWindow, { status: 'checking', version: app.getVersion() })
   })
   autoUpdater.on('update-available', (info) => {
     console.log('[auto-update] Update available:', info.version)
-    const win = getMainWindow()
-    win?.webContents.send('updater:status', { status: 'available', version: info.version })
+    sendStatus(getMainWindow, { status: 'available', version: info.version })
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'CTrack Publisher update',
+        body: `Version ${info.version} is available. Please update.`,
+      }).show()
+    }
   })
   autoUpdater.on('update-not-available', () => {
     console.log('[auto-update] Already on latest')
-    const win = getMainWindow()
-    win?.webContents.send('updater:status', { status: 'current', version: app.getVersion() })
+    sendStatus(getMainWindow, { status: 'current', version: app.getVersion() })
   })
   autoUpdater.on('download-progress', (p) => {
-    const win = getMainWindow()
-    win?.webContents.send('updater:status', {
+    sendStatus(getMainWindow, {
       status: 'downloading',
       percent: p.percent,
       version: undefined,
     })
   })
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('[auto-update] Downloaded', info.version, '— installing and restarting')
-    const win = getMainWindow()
-    win?.webContents.send('updater:status', { status: 'ready', version: info.version })
-    setTimeout(() => {
-      autoUpdater.quitAndInstall(false, true)
-    }, 1800)
+    console.log('[auto-update] Downloaded', info.version, '— waiting for user to restart')
+    sendStatus(getMainWindow, { status: 'ready', version: info.version })
+    if (Notification.isSupported()) {
+      new Notification({
+        title: 'CTrack Publisher update ready',
+        body: `Version ${info.version} downloaded. Please restart to update.`,
+      }).show()
+    }
   })
   autoUpdater.on('error', (err) => {
     console.warn('[auto-update] Error:', err?.message || err)
-    const win = getMainWindow()
-    win?.webContents.send('updater:status', { status: 'error', message: String(err?.message || err) })
+    sendStatus(getMainWindow, { status: 'error', message: String(err?.message || err) })
   })
 
   const check = () => {
@@ -59,9 +72,15 @@ export function startAutoUpdater(getMainWindow: () => BrowserWindow | null): voi
     })
   }
 
-  // Delay so window + network settle
-  setTimeout(check, 4000)
+  setTimeout(check, 1200)
   setInterval(check, 4 * 60 * 60 * 1000)
+}
+
+export function checkForUpdatesOnLaunch(): void {
+  if (!app.isPackaged) return
+  void autoUpdater.checkForUpdates().catch((e) => {
+    console.warn('[auto-update] launch check failed:', e)
+  })
 }
 
 export async function checkForUpdatesNow(): Promise<{ ok: boolean; message?: string }> {
@@ -69,6 +88,16 @@ export async function checkForUpdatesNow(): Promise<{ ok: boolean; message?: str
   try {
     const result = await autoUpdater.checkForUpdates()
     return { ok: true, message: result?.updateInfo?.version }
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) }
+  }
+}
+
+export function installUpdateNow(): { ok: boolean; message?: string } {
+  if (!app.isPackaged) return { ok: false, message: 'Updates only apply to installed builds' }
+  try {
+    autoUpdater.quitAndInstall(false, true)
+    return { ok: true }
   } catch (e) {
     return { ok: false, message: e instanceof Error ? e.message : String(e) }
   }
