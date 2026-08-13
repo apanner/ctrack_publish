@@ -26,7 +26,7 @@ jobs:
       - name: Rebuild native modules for Electron
         run: npx electron-builder install-app-deps
 
-      - name: Bundle FFmpeg runtime
+      - name: Bundle FFmpeg + OIIO + OCIO
         shell: pwsh
         run: powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ensure-media-runtime.ps1
 

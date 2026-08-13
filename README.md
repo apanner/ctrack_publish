@@ -2,6 +2,16 @@
 
 Desktop publish app for CTrack studios. Google login, queue, transcode, S3/MinIO upload — same Supabase project as **ctrack_v0**.
 
+## Bundled runtimes (no system tools)
+
+Installer includes:
+
+- **FFmpeg** — MP4 / thumbs
+- **OpenImageIO (`oiiotool`)** — EXR color convert
+- **OCIO** — ACES config (Nuke `aces_1.2` when present on the builder, else ACES cg-config)
+
+EXR publish uses OIIO+OCIO first, then FFmpeg fallback.
+
 ## Install location
 
 NSIS one-click install (per-user):

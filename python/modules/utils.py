@@ -2,6 +2,17 @@ import os
 import re
 import subprocess
 import shutil
+from pathlib import Path
+
+
+def _runtime_root() -> Path:
+    env = os.environ.get("CTRACK_RESOURCES_PATH")
+    if env:
+        return Path(env)
+    modules_dir = Path(__file__).resolve().parent
+    python_dir = modules_dir.parent
+    return python_dir.parent / "resources"
+
 
 def get_ffmpeg_path():
     """
@@ -27,6 +38,83 @@ def get_ffmpeg_path():
     if bundled:
         return bundled
     return "ffmpeg"
+
+
+def get_oiiotool_path() -> str:
+    root = _runtime_root()
+    for candidate in (
+        root / "runtime" / "oiio" / "oiiotool.exe",
+        root / "runtime" / "oiio" / "bin" / "oiiotool.exe",
+        root / "oiio" / "oiiotool.exe",
+    ):
+        if candidate.is_file():
+            return str(candidate)
+    which = shutil.which("oiiotool")
+    return which or "oiiotool"
+
+
+def get_oiio_runtime_dir():
+    tool = Path(get_oiiotool_path())
+    if tool.is_file():
+        return tool.parent
+    root = _runtime_root() / "runtime" / "oiio"
+    return root if root.is_dir() else None
+
+
+def get_ocio_config_path(explicit=None):
+    if explicit and os.path.isfile(explicit):
+        return explicit
+    env_path = os.environ.get("CTRACK_OCIO_CONFIG") or os.environ.get("OCIO")
+    if env_path and os.path.isfile(env_path):
+        return env_path
+    root = _runtime_root()
+    bundled = [
+        root / "runtime" / "ocio" / "aces_1.2" / "config.ocio",
+        root / "runtime" / "ocio" / "cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
+        root / "runtime" / "ocio" / "cg-config-v2.1.0_aces-v1.3_ocio-v2.2.ocio",
+    ]
+    for path in bundled:
+        if path.is_file():
+            return str(path)
+    return None
+
+
+def _oiio_env(ocio_config=None):
+    env = os.environ.copy()
+    oiio_dir = get_oiio_runtime_dir()
+    if oiio_dir:
+        extra = [str(oiio_dir), str(oiio_dir / "bin")]
+        env["PATH"] = os.pathsep.join(extra + [env.get("PATH", "")])
+    ocio = get_ocio_config_path(ocio_config)
+    if ocio:
+        env["OCIO"] = ocio
+    return env
+
+
+def run_oiiotool(cmd_args, log_callback=None, ocio_config=None):
+    exe = get_oiiotool_path()
+    process = subprocess.Popen(
+        [exe] + list(cmd_args),
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+        bufsize=1,
+        env=_oiio_env(ocio_config),
+    )
+    stderr_lines = []
+    while True:
+        line = process.stderr.readline()
+        if not line:
+            break
+        stderr_lines.append(line)
+        if log_callback and line.strip():
+            log_callback(line.strip())
+    process.wait()
+    stdout, rest = process.communicate()
+    if rest:
+        stderr_lines.append(rest)
+    return process.returncode, stdout or "", "".join(stderr_lines)
+
 
 def get_threads_for_parallel():
     """Returns thread count for FFmpeg when running 2 processes in parallel (~50% CPU each)."""

@@ -29,8 +29,14 @@ def check_dependencies():
         missing.append('ffmpeg-python')
 
     # Check for FFmpeg Binary
-    from modules.utils import get_ffmpeg_path
+    from modules.utils import get_ffmpeg_path, get_oiiotool_path, get_ocio_config_path
     ffmpeg_path = get_ffmpeg_path()
+    oiiotool = get_oiiotool_path()
+    ocio = get_ocio_config_path()
+    if not os.path.isfile(oiiotool) and oiiotool == "oiiotool":
+        missing.append("oiiotool (bundled OpenImageIO)")
+    if not ocio:
+        missing.append("OCIO config (bundled)")
     
     # If binary missing, we might need to suggest a way to get it
     if ffmpeg_path == 'ffmpeg':

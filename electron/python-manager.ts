@@ -68,8 +68,20 @@ export class PythonManager extends EventEmitter {
         const resourcesRoot = resolveResourcesRoot()
         process.env.CTRACK_RESOURCES_PATH = resourcesRoot
         const ffmpegDir = path.join(resourcesRoot, 'runtime', 'ffmpeg')
-        if (fs.existsSync(path.join(ffmpegDir, 'ffmpeg.exe'))) {
-            process.env.PATH = `${ffmpegDir}${path.delimiter}${process.env.PATH || ''}`
+        const oiioDir = path.join(resourcesRoot, 'runtime', 'oiio')
+        const oiioBin = path.join(oiioDir, 'bin')
+        const extraPath = [ffmpegDir, oiioDir, oiioBin].filter((p) => fs.existsSync(p))
+        if (extraPath.length) {
+            process.env.PATH = `${extraPath.join(path.delimiter)}${path.delimiter}${process.env.PATH || ''}`
+        }
+        const ocioCandidates = [
+            path.join(resourcesRoot, 'runtime', 'ocio', 'aces_1.2', 'config.ocio'),
+            path.join(resourcesRoot, 'runtime', 'ocio', 'cg-config-v2.1.0_aces-v1.3_ocio-v2.2.ocio'),
+        ]
+        const ocio = ocioCandidates.find((p) => fs.existsSync(p))
+        if (ocio) {
+            process.env.OCIO = ocio
+            process.env.CTRACK_OCIO_CONFIG = ocio
         }
         const options: Options = {
             mode: 'json',

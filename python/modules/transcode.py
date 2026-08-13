@@ -132,6 +132,22 @@ def transcode_to_mp4(input_path, output_path, options=None, log_callback=None):
     """
     options = dict(options or {})
     _ensure_start_frame_alias(options)
+    ext = os.path.splitext(input_path)[1].lower()
+    if ext == ".exr" or (is_image_sequence(input_path, options) and ".exr" in input_path.lower()):
+        try:
+            from modules.oiio_transcode import transcode_exr_oiio_to_mp4
+            from modules.utils import get_oiiotool_path, get_ocio_config_path
+            if os.path.isfile(get_oiiotool_path()) and get_ocio_config_path():
+                if log_callback:
+                    log_callback("[transcode] EXR via bundled OpenImageIO + OCIO")
+                result = transcode_exr_oiio_to_mp4(input_path, output_path, options, log_callback)
+                if result.get("status") == "success":
+                    return result
+                if log_callback:
+                    log_callback(f"[transcode] OIIO fallback to FFmpeg: {result.get('message')}")
+        except Exception as exc:
+            if log_callback:
+                log_callback(f"[transcode] OIIO unavailable, FFmpeg: {exc}")
     if is_image_sequence(input_path, options):
         frame_start = options.get('frame_start', 1)
         frame_end = options.get('frame_end', frame_start)
