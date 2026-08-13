@@ -57,6 +57,7 @@ async function notifyShotPublishRecipients(params: {
     shotId: string;
     taskId?: string | null;
     versionId?: string | null;
+    elementId?: string | null;
     type: 'version_submitted' | 'element_published';
     granularType: 'my_version_created' | 'my_element_published';
     title: string;
@@ -74,7 +75,7 @@ async function notifyShotPublishRecipients(params: {
         .from('project_members')
         .select('user_id')
         .eq('project_id', params.projectId)
-        .in('role', ['supervisor', 'manager', 'production', 'admin']);
+        .in('role', ['supervisor', 'manager', 'production', 'admin', 'developer']);
     const { data: taskRows } = await supabase
         .from('shot_tasks')
         .select('assigned_to')
@@ -88,18 +89,19 @@ async function notifyShotPublishRecipients(params: {
         if (r.assigned_to) recipientIds.add(r.assigned_to);
     });
     const finalRecipientIds = Array.from(recipientIds);
-    if (!finalRecipientIds.length) return;
 
-    const { data: prefs } = await supabase
-        .from('notification_preferences')
-        .select('user_id, enabled')
-        .eq('notification_type', params.granularType)
-        .in('user_id', finalRecipientIds);
-    const disabled = new Set((prefs || []).filter((p: { enabled: boolean }) => p.enabled === false).map((p: { user_id: string }) => p.user_id));
-    const filteredRecipientIds = finalRecipientIds.filter((id) => !disabled.has(id));
-    if (!filteredRecipientIds.length) return;
+    let filteredRecipientIds = finalRecipientIds;
+    if (finalRecipientIds.length > 0) {
+        const { data: prefs } = await supabase
+            .from('notification_preferences')
+            .select('user_id, enabled')
+            .eq('notification_type', params.granularType)
+            .in('user_id', finalRecipientIds);
+        const disabled = new Set((prefs || []).filter((p: { enabled: boolean }) => p.enabled === false).map((p: { user_id: string }) => p.user_id));
+        filteredRecipientIds = finalRecipientIds.filter((id) => !disabled.has(id));
+    }
 
-    const payload = {
+    const payload: Record<string, unknown> = {
         p_type: params.type,
         p_title: params.title,
         p_message: params.message,
@@ -109,7 +111,9 @@ async function notifyShotPublishRecipients(params: {
         p_shot_id: params.shotId,
         p_task_id: params.taskId ?? null,
         p_version_id: params.versionId ?? null,
-        p_note_id: null
+        p_note_id: null,
+        p_element_id: params.elementId ?? null,
+        p_metadata: {},
     };
     const { error } = await supabase.rpc('rpc_notify_recipients', payload);
     if (!error) return;
@@ -118,15 +122,37 @@ async function notifyShotPublishRecipients(params: {
     const errCode = (error as { code?: string })?.code;
     console.warn(`[NOTIFY] rpc_notify_recipients failed: code=${errCode ?? 'unknown'}, message=${errMsg}`);
 
+    const { error: legacyError } = await supabase.rpc('rpc_notify_recipients', {
+        p_type: params.type,
+        p_title: params.title,
+        p_message: params.message,
+        p_recipient_ids: filteredRecipientIds,
+        p_actor_id: params.actorId,
+        p_project_id: params.projectId,
+        p_shot_id: params.shotId,
+        p_task_id: params.taskId ?? null,
+        p_version_id: params.versionId ?? null,
+        p_note_id: null,
+    });
+    if (!legacyError) return;
+
     if (params.type === 'element_published') {
         const { error: fallbackError } = await supabase.rpc('rpc_notify_recipients', {
-            ...payload,
-            p_type: 'version_submitted'
+            p_type: 'version_submitted',
+            p_title: params.title,
+            p_message: params.message,
+            p_recipient_ids: filteredRecipientIds,
+            p_actor_id: params.actorId,
+            p_project_id: params.projectId,
+            p_shot_id: params.shotId,
+            p_task_id: params.taskId ?? null,
+            p_version_id: params.versionId ?? null,
+            p_note_id: null,
         });
         if (!fallbackError) return;
         throw fallbackError;
     }
-    throw error;
+    throw legacyError;
 }
 
 function resolveStudioSlugForStorage(): string {
@@ -1301,7 +1327,7 @@ export function usePublishQueue() {
                 stage: 'submit',
                 eventType: 'started'
             });
-            const { error: dbError } = await supabase.from('shot_elements').insert({
+            const { data: insertedElement, error: dbError } = await supabase.from('shot_elements').insert({
                 shot_id: sId,
                 project_id: pId,
                 category: categoryVal,
@@ -1324,7 +1350,7 @@ export function usePublishQueue() {
                     ...(originalSize > 0 && { sequence_total_bytes: originalSize })
                 },
                 created_by: user.id
-            });
+            }).select('id').single();
 
             if (dbError) {
                 console.error("Supabase Error (Element):", dbError);
@@ -1346,6 +1372,7 @@ export function usePublishQueue() {
                     shotId: sId,
                     taskId: job.context?.taskId ?? null,
                     versionId: null,
+                    elementId: insertedElement?.id ?? null,
                     type: 'element_published',
                     granularType: 'my_element_published',
                     title: 'Element published',
