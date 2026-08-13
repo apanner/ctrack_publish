@@ -74,8 +74,7 @@ async function notifyShotPublishRecipients(params: {
     const { data: pmRows } = await supabase
         .from('project_members')
         .select('user_id')
-        .eq('project_id', params.projectId)
-        .in('role', ['supervisor', 'manager', 'production', 'admin', 'developer']);
+        .eq('project_id', params.projectId);
     const { data: taskRows } = await supabase
         .from('shot_tasks')
         .select('assigned_to')
